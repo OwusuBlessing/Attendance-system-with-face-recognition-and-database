@@ -10,6 +10,18 @@ import pickle
 import cv2
 import cvzone
 import os
+import firebase_admin
+from firebase_admin import credentials
+from firebase_admin import db
+from firebase_admin import storage
+
+firebase_admin.delete_app(firebase_admin.get_app())
+cred = credentials.Certificate(r"C:/Users/ME/Desktop/Blessing_AI/Face_attendance/python_files/Service_account_key.json")
+firebase_admin.initialize_app(cred,{
+    'databaseURL':'https://face-attendance-system-c9176-default-rtdb.firebaseio.com/',
+    'storageBucket':'face-attendance-system-c9176.appspot.com'})
+
+bucket = storage.bucket()
 cap = cv2.VideoCapture(0)
 cap.set(3,640)
 cap.set(4,480)
@@ -34,7 +46,9 @@ file.close()
 print(encodeListKnown)
 print("Encoded file loaded completely")
 
-
+mode_type = 0
+counter = 0
+id_ = -1
 while True:
     success,img = cap.read()
 
@@ -47,7 +61,7 @@ while True:
     encodeCurFrame = face_recognition.face_encodings(imgS,faceCurFrame)
 
     imgBackground[162:162 + 480,55:55 + 640] = img
-    imgBackground[44:44 + 633, 808:808 + 414] = imgModeList[1]
+    imgBackground[44:44 + 633, 808:808 + 414] = imgModeList[mode_type]
     
     print(faceCurFrame)
     # print(encodeCurFrame)
@@ -63,7 +77,45 @@ while True:
                         y1, x2, y2, x1 = y1 * 4, x2 * 4, y2 * 4, x1 * 4
                         bbox = 55 + x1, 162 + y1, x2 - x1 , y2 - y1
                         imgBackground = cvzone.cornerRect(imgBackground,bbox,rt=0)
+                        id_ = studentsIds[match_index]
+                        print(id_)
                         
+                        if counter == 0:
+                            counter = 1
+                            mode_type = 1
+        if counter != 0:
+            if counter == 1:
+                student_info = db.reference(f'Students/{id_}').get()
+                
+                #get image data from storage
+                blob = bucket.get_blob(f'Images/{id_}.jpg')
+                array = np.frombuffer(blob.download_as_string(),np.uint8)
+                img_student = cv2.imdecode(array,cv2.COLOR_BGRA2BGR)
+                #update attendance data
+                ref = db.reference(f'Students/{id_}')
+                student_info['Total attendance'] += 1
+                ref.child('Total attendance').set(student_info['Total attendance'])
+                
+            cv2.putText(imgBackground,str(student_info['Total attendance']),(861,125),cv2.FONT_HERSHEY_COMPLEX,1,(255,255,255),1)
+            cv2.putText(imgBackground,str(student_info['Major']),(1006,550),cv2.FONT_HERSHEY_COMPLEX,0.5,(255,255,255),1)
+            cv2.putText(imgBackground,str(id_),(1006,493),cv2.FONT_HERSHEY_COMPLEX,0.6,(255,255,255),1)
+            cv2.putText(imgBackground,str(student_info['Level']),(1025,625),cv2.FONT_HERSHEY_COMPLEX,0.6,(100,100,100),1)
+            cv2.putText(imgBackground,str(student_info['Starting Year']),(1125,625),cv2.FONT_HERSHEY_COMPLEX,0.6,(100,100,100),1)
+            
+            #Centre name on graphic
+            (w,h),_ = cv2.getTextSize(student_info["Name"],cv2.FONT_HERSHEY_COMPLEX,1,1)
+            offset = (414 - w)//2
+            cv2.putText(imgBackground,str(student_info['Name']),(808 + offset,445),cv2.FONT_HERSHEY_COMPLEX,1,(50,50,50),1)
+              
+            imgBackground[175 : 175 + 216,909:909 + 216] = img_student
+                
+            
+                
+                
+                
+                
+            counter += 1
+                            
                 
                 
     
