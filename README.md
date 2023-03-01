@@ -48,7 +48,7 @@ pip install firebase_admin
 
 *Database setup*
 
-In this step , you create your own database on ![fire base](https://firebase.google.com/?gclid=CjwKCAiAjPyfBhBMEiwAB2CCIk2EshHBEcUQk3Z0qZxQJa-JzD3dnqSxu8sJByhipnSxW4R_5WgeChoCFP4QAvD_BwE&gclsrc=aw.ds) and also create storage to store student images.
+In this step , you create your own database on ![fire base](https://firebase.google.com/) and also create storage to store student images.
 
 **Step 5**
 
