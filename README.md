@@ -4,6 +4,7 @@
 
 ![Attendance system](https://github.com/OwusuBlessing/Face-Recognition-system/blob/master/mato_face_PNG.PNG)
 ![Attendance system](https://github.com/OwusuBlessing/Attendance-system-with-face-recognition-and-database/blob/master/almar.PNG)
+
 This project aims to automate attendance System using facial recognition (face recognition libarry).The project is implemented with firebase database such that information about student can be gotten from the database once the attendance is marked.This project follows this face recognition in real time course on [youtube](https://www.youtube.com/watch?v=iBomaK2ARyI)
 
 
