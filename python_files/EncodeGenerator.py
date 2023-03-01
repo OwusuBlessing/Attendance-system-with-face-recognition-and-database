@@ -13,7 +13,7 @@ from firebase_admin import credentials
 from firebase_admin import db
 from firebase_admin import storage
 
-
+os.chdir(r"C:\Users\ME\Desktop\Blessing_AI\Face_attendance")
 
 firebase_admin.delete_app(firebase_admin.get_app())
 
@@ -37,7 +37,7 @@ for path in PathList:
     blob = bucket.blob(file_name)
     blob.upload_from_filename(file_name)    
 #Generate encodings
- 
+
 def findEncodings(imagesList):
     encodeList = []
     for img in imagesList:

@@ -10,6 +10,7 @@ import pickle
 import cv2
 import cvzone
 import os
+from datetime import datetime
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import db
@@ -81,6 +82,9 @@ while True:
                         print(id_)
                         
                         if counter == 0:
+                            # cvzone.putTextRect(imgBackground, "Loading", (275, 400))
+                           # cv2.imshow("Face Attendance", imgBackground)
+                            # cv2.waitKey(1)
                             counter = 1
                             mode_type = 1
         if counter != 0:
@@ -92,33 +96,60 @@ while True:
                 array = np.frombuffer(blob.download_as_string(),np.uint8)
                 img_student = cv2.imdecode(array,cv2.COLOR_BGRA2BGR)
                 #update attendance data
-                ref = db.reference(f'Students/{id_}')
-                student_info['Total attendance'] += 1
-                ref.child('Total attendance').set(student_info['Total attendance'])
+                date_time_object = datetime.strptime(student_info['Last time attended'],'%Y-%m-%d %H:%M:%S')
+                sec_elap = (datetime.now() - date_time_object).total_seconds()
+                if sec_elap > 240:
+                    ref = db.reference(f'Students/{id_}')
+                    student_info['Total attendance'] += 1
+                    ref.child('Total attendance').set(student_info['Total attendance'])
+                    ref.child('Last time attended').set(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+                else:
+                    mode_type = 3
+                    counter = 0
+                    imgBackground[44:44 + 633, 808:808 + 414] = imgModeList[mode_type]
+ 
                 
-            cv2.putText(imgBackground,str(student_info['Total attendance']),(861,125),cv2.FONT_HERSHEY_COMPLEX,1,(255,255,255),1)
-            cv2.putText(imgBackground,str(student_info['Major']),(1006,550),cv2.FONT_HERSHEY_COMPLEX,0.5,(255,255,255),1)
-            cv2.putText(imgBackground,str(id_),(1006,493),cv2.FONT_HERSHEY_COMPLEX,0.6,(255,255,255),1)
-            cv2.putText(imgBackground,str(student_info['Level']),(1025,625),cv2.FONT_HERSHEY_COMPLEX,0.6,(100,100,100),1)
-            cv2.putText(imgBackground,str(student_info['Starting Year']),(1125,625),cv2.FONT_HERSHEY_COMPLEX,0.6,(100,100,100),1)
+        if mode_type != 3:
+           
+              if 30 < counter < 60:
+                mode_type = 2
+              imgBackground[44:44 + 633, 808:808 + 414] = imgModeList[mode_type]
             
-            #Centre name on graphic
-            (w,h),_ = cv2.getTextSize(student_info["Name"],cv2.FONT_HERSHEY_COMPLEX,1,1)
-            offset = (414 - w)//2
-            cv2.putText(imgBackground,str(student_info['Name']),(808 + offset,445),cv2.FONT_HERSHEY_COMPLEX,1,(50,50,50),1)
-              
-            imgBackground[175 : 175 + 216,909:909 + 216] = img_student
-                
+      
             
                 
-                
-                
-                
-            counter += 1
+              if counter <= 30:
+                    
+                        cv2.putText(imgBackground,str(student_info['Total attendance']),(861,125),cv2.FONT_HERSHEY_COMPLEX,1,(255,255,255),1)
+                        cv2.putText(imgBackground,str(student_info['Major']),(1006,550),cv2.FONT_HERSHEY_COMPLEX,0.5,(255,255,255),1)
+                        cv2.putText(imgBackground,str(id_),(1006,493),cv2.FONT_HERSHEY_COMPLEX,0.6,(255,255,255),1)
+                        cv2.putText(imgBackground,str(student_info['Level']),(1025,625),cv2.FONT_HERSHEY_COMPLEX,0.6,(100,100,100),1)
+                        cv2.putText(imgBackground,str(student_info['Starting Year']),(1125,625),cv2.FONT_HERSHEY_COMPLEX,0.6,(100,100,100),1)
+                        
+                        #Centre name on graphic
+                        (w,h),_ = cv2.getTextSize(student_info["Name"],cv2.FONT_HERSHEY_COMPLEX,1,1)
+                        offset = (414 - w)//2
+                        cv2.putText(imgBackground,str(student_info['Name']),(808 + offset,445),cv2.FONT_HERSHEY_COMPLEX,1,(50,50,50),1)
+                          
+                        imgBackground[175 : 175 + 216,909:909 + 216] = img_student
                             
+                        
+                    
+                    
+                    
+                    
+              counter += 1
+              if counter >= 60 :
+                    counter = 0
+                    mode_type = 0
+                    studuent_info = []
+                    img_student = []
+                    imgBackground[44:44 + 633, 808:808 + 414] = imgModeList[mode_type]
+                    
                 
-                
-    
+    else:
+       mode_type = 0
+       counter = 0
     cv2.imshow("Face attendance",imgBackground)
     if cv2.waitKey(1) & 0xFF == ord('q'):
       break
