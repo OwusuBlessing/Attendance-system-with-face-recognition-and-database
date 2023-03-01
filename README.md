@@ -101,7 +101,7 @@ To demontrate the attendance system in real time ,open the main.py file, make ch
 
 
 
-- 🔭 I’m currently working on **    ofbject detection projects**
+- 🔭 I’m currently working on **object detection projects**
 
 - 🌱 I’m currently learning **SQL,NLP,Image Segementaion**
 
